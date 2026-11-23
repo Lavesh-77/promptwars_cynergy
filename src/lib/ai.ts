@@ -3,6 +3,7 @@ import { equipment } from "../data.js";
 import type { AccessRequest, LabState } from "../types";
 import {
   isAvailable,
+  dateKey,
   rankRequests,
   recommendSlots,
   requestSchema,
@@ -49,6 +50,12 @@ export const aiInputSchema = z
       const structural =
         equipment.some((e) => e.id === r.equipmentId) &&
         /^\d{4}-\d{2}-\d{2}$/.test(r.date) &&
+        !Number.isNaN(new Date(`${r.date}T12:00:00`).getTime()) &&
+        dateKey(new Date(`${r.date}T12:00:00`)) === r.date &&
+        /^\d{4}-\d{2}-\d{2}$/.test(r.deadline) &&
+        !Number.isNaN(new Date(`${r.deadline}T12:00:00`).getTime()) &&
+        dateKey(new Date(`${r.deadline}T12:00:00`)) === r.deadline &&
+        r.deadline >= r.date &&
         r.start >= 540 &&
         r.start + r.duration <= 1020 &&
         r.start % 30 === 0 &&

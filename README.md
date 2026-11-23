@@ -6,9 +6,13 @@ Discover 12 resources across four departments, submit a project-based request, r
 
 Repository: https://github.com/Lavesh-77/promptwars_cynergy
 
+**Live Gemini application:** https://promptwars-cynergy.vercel.app/
+
+**Static/manual fallback:** https://lavesh-77.github.io/promptwars_cynergy/
+
 ## Run locally
 
-Requires Node.js **24 LTS** and npm. No accounts, database, environment variables, or API keys are needed.
+Requires Node.js **24 LTS** and npm. The local/static manual workflow needs no accounts or keys. Real Gemini advice requires the Vercel setup documented below.
 
 ```bash
 npm ci
@@ -23,7 +27,7 @@ Open http://localhost:5173. Production: `npm run build`, then `npm run preview`.
 2. Search equipment or filter by department and category.
 3. Select **Try a scheduling conflict**. Tomorrow’s oscilloscope already has an approved 10:00–12:00 booking.
 4. Use a fictional name, a project title, and a short description. Either select a suggested alternative, or submit the conflicting slot for faculty review.
-5. Open **Faculty demo**. Review the deadline/fair-share ordered queue. A conflicting preferred slot cannot be approved; select one of the feasible alternatives instead.
+5. Open **Faculty demo**. On Vercel, select **Generate AI allocation advice** to call Google Gemini and review its explanations. Advice never approves or reschedules anything. Review the deadline/fair-share ordered queue. A conflicting preferred slot cannot be approved; select one of the feasible alternatives instead.
 6. Observe the approved status. Reload and open **My requests** to verify persistence.
 7. **Reset demo** in the footer restores samples after confirmation.
 
@@ -38,6 +42,7 @@ Open http://localhost:5173. Production: `npm run build`, then `npm run preview`.
 - Faculty-confirmed rescheduling: when one approved flexible booking blocks an exact-slot request, choose a feasible replacement and explicitly confirm the move and approval together. Both changes are revalidated and persisted atomically in the local store. No cascading/multiple-booking moves.
 - Submission timestamps with timezone, a “Requested first” badge for the earliest overlapping submission, and linked submission/approval/rejection/rescheduling history. Legacy demo records show missing historical approval timestamps honestly.
 - Browser-local persistence, cross-tab updates, Web Locks for approval serialization on supported browsers, explicit demo reset and storage error recovery.
+- Google Gemini scheduling explanations through a server-only Vercel API, with validated priority-ordered feasible slots, timeouts and graceful manual fallback.
 - Native modal focus trapping, labelled fields, keyboard focus styles, skip link, reduced-motion support, textual status indicators.
 - Unit/integration tests, Playwright desktop/mobile workflows and accessibility checks, main-only deployment workflow.
 
