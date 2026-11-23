@@ -111,12 +111,13 @@ function RequestCard({
     request.start,
     request.duration,
     request.id,
+    state.stock,
   );
   const alternatives =
     request.status === "pending" && !available
-      ? recommendSlots(request, state.requests)
+      ? recommendSlots(request, state.requests, state.stock)
       : [];
-  const relocation = relocationOptions(request, state.requests);
+  const relocation = relocationOptions(request, state.requests, state.stock);
   const first = requestedFirst(request, state.requests);
   return (
     <article className="request-card">
@@ -160,7 +161,7 @@ function RequestCard({
         <div className="conflict-note">
           <strong>Scheduling conflict</strong>
           <p>
-            The preferred slot overlaps an approved booking.
+            All units are booked during part or all of the preferred slot.
             {!request.flexible &&
               " This student needs the exact slot. Keep the request pending while reviewing a possible move; it will not be automatically rejected."}
           </p>

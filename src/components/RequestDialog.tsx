@@ -15,12 +15,14 @@ import {
   recommendSlots,
   requestSchema,
   timeLabel,
+  stockCount,
 } from "../lib/scheduler";
 
 interface Props {
   item: Equipment;
   state: LabState;
   onClose: () => void;
+  onViewRequests: () => void;
   onSubmit: (input: unknown) => Promise<boolean>;
   conflict?: boolean;
 }
@@ -28,6 +30,7 @@ export default function RequestDialog({
   item,
   state,
   onClose,
+  onViewRequests,
   onSubmit,
   conflict,
 }: Props) {
@@ -57,8 +60,14 @@ export default function RequestDialog({
     draft.date,
     draft.start,
     draft.duration,
+    undefined,
+    state.stock,
   );
-  const slots = recommendSlots(draft as AccessRequest, state.requests);
+  const slots = recommendSlots(
+    draft as AccessRequest,
+    state.requests,
+    state.stock,
+  );
   function field(key: keyof typeof draft, value: string | number | boolean) {
     setDraft((previous) => ({ ...previous, [key]: value }));
     setError("");
@@ -88,8 +97,12 @@ export default function RequestDialog({
             Your request is pending faculty demo approval. It does not reserve
             the equipment yet.
           </p>
-          <button className="button primary" onClick={onClose}>
+          <p>Would you like to view your requests or keep exploring?</p>
+          <button className="button primary" onClick={onViewRequests}>
             View my requests <ArrowRight size={17} />
+          </button>
+          <button className="button secondary" onClick={onClose}>
+            Keep exploring
           </button>
         </div>
       ) : (
@@ -98,6 +111,8 @@ export default function RequestDialog({
           <h2 id="request-title">Request equipment access</h2>
           <p className="muted">
             {item.name} · {item.location}
+            {" · "}
+            {stockCount(item.id, state.stock)} units
           </p>
           <div className="requirement">
             <CheckCircle2 size={17} />

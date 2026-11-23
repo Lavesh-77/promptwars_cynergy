@@ -4,6 +4,14 @@ import { equipment } from "../data";
 
 export const OPEN = 9 * 60;
 export const CLOSE = 17 * 60;
+// Unlisted resources keep one unit, including the seeded conflict scenario.
+const defaultStock: Record<string, number> = { arduino: 3, pi: 2, esp32: 3 };
+export function stockCount(
+  equipmentId: string,
+  stock: Record<string, number> = {},
+) {
+  return stock[equipmentId] ?? defaultStock[equipmentId] ?? 1;
+}
 // All dates are campus wall-clock dates; no UTC conversion is used for slots.
 export function dateKey(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -111,6 +119,7 @@ export function isAvailable(
   start: number,
   duration: number,
   excludeId?: string,
+  stock?: Record<string, number>,
 ): boolean {
   return (
     start >= OPEN &&
@@ -119,13 +128,16 @@ export function isAvailable(
     duration <= 240 &&
     duration % 30 === 0 &&
     start + duration <= CLOSE &&
-    !requests.some(
-      (r) =>
-        r.id !== excludeId &&
-        r.status === "approved" &&
-        r.equipmentId === equipmentId &&
-        r.date === date &&
-        overlaps(r, { start, duration }),
+    Array.from({ length: duration / 30 }, (_, i) => start + i * 30).every(
+      (time) =>
+        requests.filter(
+          (r) =>
+            r.id !== excludeId &&
+            r.status === "approved" &&
+            r.equipmentId === equipmentId &&
+            r.date === date &&
+            overlaps(r, { start: time, duration: 30 }),
+        ).length < stockCount(equipmentId, stock),
     )
   );
 }
@@ -135,6 +147,7 @@ export function recommendSlots(
     "equipmentId" | "date" | "deadline" | "start" | "duration" | "flexible"
   >,
   requests: AccessRequest[],
+  stock?: Record<string, number>,
 ): Slot[] {
   const options: Slot[] = [];
   const last =
@@ -161,6 +174,8 @@ export function recommendSlots(
           date,
           start,
           request.duration,
+          undefined,
+          stock,
         )
       ) {
         options.push({
@@ -169,7 +184,7 @@ export function recommendSlots(
           reason:
             date === request.date && start === request.start
               ? "Your preferred slot is available and finishes before your deadline."
-              : `No booking overlap · full ${request.duration}-minute session · within your deadline.`,
+              : `Stock available · full ${request.duration}-minute session · within your deadline.`,
         });
       }
     }
@@ -223,6 +238,7 @@ export function blockingBookings(
 export function relocationOptions(
   request: AccessRequest,
   requests: AccessRequest[],
+  stock?: Record<string, number>,
 ): { booking: AccessRequest; slots: Slot[] } | null {
   if (
     request.status !== "pending" ||
@@ -230,23 +246,48 @@ export function relocationOptions(
     !requestSchema.safeParse(request).success
   )
     return null;
-  const blockers = blockingBookings(request, requests);
   if (
-    blockers.length !== 1 ||
-    !blockers[0].flexible ||
-    !requestSchema.safeParse(blockers[0]).success
+    isAvailable(
+      requests,
+      request.equipmentId,
+      request.date,
+      request.start,
+      request.duration,
+      request.id,
+      stock,
+    )
   )
     return null;
-  const booking = blockers[0];
-  const reserved = [
-    ...requests.filter((r) => r.id !== booking.id && r.id !== request.id),
-    { ...request, status: "approved" as const },
-  ];
-  // A flexible booking may move earlier or later, but never outside its deadline.
-  return {
-    booking,
-    slots: recommendSlots({ ...booking, date: dateKey() }, reserved),
-  };
+  const blockers = blockingBookings(request, requests).filter(
+    (booking) =>
+      booking.flexible &&
+      requestSchema.safeParse(booking).success &&
+      isAvailable(
+        requests.filter((r) => r.id !== booking.id),
+        request.equipmentId,
+        request.date,
+        request.start,
+        request.duration,
+        request.id,
+        stock,
+      ),
+  );
+  let fallback: { booking: AccessRequest; slots: Slot[] } | null = null;
+  for (const booking of blockers) {
+    const reserved = [
+      ...requests.filter((r) => r.id !== booking.id && r.id !== request.id),
+      { ...request, status: "approved" as const },
+    ];
+    // A flexible booking may move earlier or later, but never outside its deadline.
+    const slots = recommendSlots(
+      { ...booking, date: dateKey() },
+      reserved,
+      stock,
+    );
+    if (slots.length) return { booking, slots };
+    fallback ??= { booking, slots };
+  }
+  return fallback;
 }
 
 export function requestedFirst(

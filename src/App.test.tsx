@@ -19,6 +19,31 @@ beforeAll(() => {
   };
 });
 describe("public demo workflow", () => {
+  it("lets faculty edit stock and preserves it on reload", async () => {
+    const user = userEvent.setup();
+    const rendered = render(<App />);
+    await user.click(screen.getByRole("button", { name: "Faculty demo" }));
+    const input = screen.getByRole("spinbutton", {
+      name: "Arduino Uno R4 WiFi stock",
+    });
+    expect(input).toHaveValue(3);
+    await user.clear(input);
+    await user.type(input, "2");
+    await user.click(
+      screen.getByRole("button", {
+        name: "Save stock for Arduino Uno R4 WiFi",
+      }),
+    );
+    expect(
+      await screen.findByText("Equipment stock updated in this browser."),
+    ).toBeInTheDocument();
+    rendered.unmount();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Faculty demo" }));
+    expect(
+      screen.getByRole("spinbutton", { name: "Arduino Uno R4 WiFi stock" }),
+    ).toHaveValue(2);
+  });
   it("filters equipment and clears empty results", async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -56,7 +81,17 @@ describe("public demo workflow", () => {
     expect(
       await screen.findByRole("heading", { name: "Request submitted!" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Search equipment" }),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "View my requests" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Search equipment" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Campus garden sensor" }),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Faculty demo" }));
     const heading = screen.getByRole("heading", {
       name: "Campus garden sensor",
@@ -81,6 +116,52 @@ describe("public demo workflow", () => {
       ).getByText("approved", { exact: true }),
     ).toBeInTheDocument();
   });
+  it.each(["Keep exploring", "Close request form", "Escape"])(
+    "stays on Discover and preserves the request after choosing %s",
+    async (choice) => {
+      const user = userEvent.setup();
+      render(<App />);
+      await user.click(
+        screen.getByRole("button", {
+          name: "Request access to Arduino Uno R4 WiFi",
+        }),
+      );
+      const dialog = screen.getByRole("dialog");
+      fireEvent.change(within(dialog).getByLabelText("Your name"), {
+        target: { value: "Alex Demo" },
+      });
+      fireEvent.change(within(dialog).getByLabelText("Project title"), {
+        target: { value: "Keep exploring project" },
+      });
+      fireEvent.change(
+        within(dialog).getByLabelText("Project & equipment requirements"),
+        { target: { value: "Test a working sensor prototype." } },
+      );
+      await user.click(
+        within(dialog).getByRole("button", { name: "Submit access request" }),
+      );
+      expect(
+        await screen.findByRole("heading", { name: "Request submitted!" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("textbox", { name: "Search equipment" }),
+      ).toBeInTheDocument();
+      if (choice === "Escape") {
+        // jsdom does not implement the browser's native Escape-to-cancel action.
+        fireEvent(dialog, new Event("cancel", { bubbles: false }));
+      } else {
+        await user.click(within(dialog).getByRole("button", { name: choice }));
+      }
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("textbox", { name: "Search equipment" }),
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: /My requests/ }));
+      expect(
+        screen.getByRole("heading", { name: "Keep exploring project" }),
+      ).toBeInTheDocument();
+    },
+  );
   it("explains a booking conflict and lets a student choose a feasible slot", async () => {
     const user = userEvent.setup();
     render(<App />);

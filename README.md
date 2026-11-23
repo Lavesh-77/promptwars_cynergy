@@ -57,10 +57,12 @@ React UI → Zod request validation → deterministic scheduling → browser-loc
 
 **Scheduling policy:** daily 09:00–17:00, 30-minute increments, 30-minute to four-hour sessions. Dates use the browser's local wall-clock timezone as the demo campus timezone. Alternatives fit the entire session before the project deadline, preferring the requested day and nearby times. Exact-slot requests are not automatically moved. Faculty retain discretion; queue ranking is advisory, not forced preemption.
 
+**Stock:** each request uses one unit. Arduino and ESP32 kits default to 3 units, Raspberry Pi kits to 2, and other resources to 1. Faculty can save counts from 1–100 in **Equipment stock**. Availability checks simultaneous usage across the entire session, not just how many bookings intersect it. Reductions that would overbook existing approvals are rejected without changing bookings. Counts persist in this browser; legacy saved requests remain readable. The conflict demo fills the selected oscilloscope slot to its current capacity.
+
 ### Fixed versus flexible conflicts
 
 1. Queue ordering remains **deadline first**. For equal deadlines, exact-slot requests precede flexible requests, then fair-share usage and submission time.
-2. A fixed request overlapping one approved flexible booking offers faculty replacement options for the flexible project. Replacement options may be earlier or later than its original date, but must be in the future, meet its deadline, preserve duration, and avoid all approved sessions and the incoming fixed session.
+2. When stock is full and moving one approved flexible booking frees enough capacity, an exact-slot request offers faculty replacement options. Replacements may be earlier or later, but must be in the future, meet the project's deadline, preserve duration, and stay within stock capacity alongside approved sessions and the incoming fixed session.
 3. Faculty choose a replacement, review both original/new sessions, and explicitly confirm. Cancel makes no changes. A stale or unavailable replacement makes no changes to either booking.
 4. If no replacement is feasible, the existing approval remains and the fixed request stays pending, with both submission times and the first-request badge available for review. There is no automatic rejection or cancellation.
 5. Multiple blocking bookings, non-flexible blockers, and sessions already started require manual review. No automatic rescheduling or cascade is performed.

@@ -11,7 +11,9 @@ import {
   dateKey,
   isAvailable,
   requestSchema,
+  stockCount,
 } from "./scheduler";
+import { equipment } from "../data";
 
 const KEY = "lablink-demo-v1";
 const sessionSlot = z.object({
@@ -47,6 +49,12 @@ const storedRequest = z.object({
 const stateSchema = z.object({
   version: z.literal(1),
   requests: z.array(storedRequest).max(1000),
+  stock: z
+    .record(
+      z.string().refine((id) => equipment.some((item) => item.id === id)),
+      z.number().int().min(1).max(100),
+    )
+    .optional(),
 });
 export function initialState(): LabState {
   const date = addDays(dateKey(), 1);
@@ -173,6 +181,7 @@ export function decideRequest(
         updated.start,
         updated.duration,
         id,
+        state.stock,
       )
     )
       throw new Error(
@@ -217,8 +226,25 @@ export function approveWithRelocation(
     !booking ||
     booking.status !== "approved" ||
     !booking.flexible ||
-    blockers.length !== 1 ||
-    blockers[0].id !== booking.id
+    !blockers.some((r) => r.id === booking.id) ||
+    !isAvailable(
+      state.requests.filter((r) => r.id !== booking.id),
+      fixed.equipmentId,
+      fixed.date,
+      fixed.start,
+      fixed.duration,
+      fixed.id,
+      state.stock,
+    ) ||
+    isAvailable(
+      state.requests,
+      fixed.equipmentId,
+      fixed.date,
+      fixed.start,
+      fixed.duration,
+      fixed.id,
+      state.stock,
+    )
   )
     throw new Error(
       "The conflict has changed. Review the latest bookings before confirming.",
@@ -242,6 +268,8 @@ export function approveWithRelocation(
       fixed.date,
       fixed.start,
       fixed.duration,
+      undefined,
+      state.stock,
     ) ||
     !isAvailable(
       [...others, approved],
@@ -249,6 +277,8 @@ export function approveWithRelocation(
       moved.date,
       moved.start,
       moved.duration,
+      undefined,
+      state.stock,
     )
   )
     throw new Error(
@@ -284,6 +314,43 @@ export function approveWithRelocation(
       r.id === moved.id ? moved : r.id === newlyApproved.id ? newlyApproved : r,
     ),
   };
+}
+export function updateStock(
+  state: LabState,
+  equipmentId: string,
+  count: number,
+): LabState {
+  if (
+    !equipment.some((item) => item.id === equipmentId) ||
+    !Number.isInteger(count) ||
+    count < 1 ||
+    count > 100
+  )
+    throw new Error(
+      "Stock must be a whole number between 1 and 100 for valid equipment.",
+    );
+  const stock = { ...state.stock, [equipmentId]: count };
+  if (
+    count < stockCount(equipmentId, state.stock) &&
+    state.requests.some(
+      (r) =>
+        r.equipmentId === equipmentId &&
+        r.status === "approved" &&
+        !isAvailable(
+          state.requests,
+          equipmentId,
+          r.date,
+          r.start,
+          r.duration,
+          r.id,
+          stock,
+        ),
+    )
+  )
+    throw new Error(
+      "Cannot reduce stock below existing simultaneous approved bookings. Existing bookings were not changed.",
+    );
+  return { ...state, stock };
 }
 export async function transact(
   update: (state: LabState) => LabState,

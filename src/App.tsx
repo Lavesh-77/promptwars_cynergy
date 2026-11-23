@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { equipment } from "./data";
 import type { Equipment, LabState } from "./types";
-import { addDays, dateKey, isAvailable } from "./lib/scheduler";
+import { addDays, dateKey, isAvailable, stockCount } from "./lib/scheduler";
 import {
   createRequest,
   decideRequest,
@@ -30,10 +30,12 @@ import {
   initialState,
   loadState,
   transact,
+  updateStock,
 } from "./lib/store";
 import EquipmentArt from "./components/EquipmentArt";
 import RequestDialog from "./components/RequestDialog";
 import RequestList from "./components/RequestList";
+import StockEditor from "./components/StockEditor";
 
 type View = "discover" | "requests" | "faculty";
 export default function App() {
@@ -77,7 +79,15 @@ export default function App() {
   const pending = state.requests.filter((r) => r.status === "pending").length;
   function hasSlots(item: Equipment) {
     return Array.from({ length: 16 }, (_, i) => 540 + i * 30).some((start) =>
-      isAvailable(state.requests, item.id, tomorrow, start, 30),
+      isAvailable(
+        state.requests,
+        item.id,
+        tomorrow,
+        start,
+        30,
+        undefined,
+        state.stock,
+      ),
     );
   }
   const filtered = equipment.filter(
@@ -115,23 +125,25 @@ export default function App() {
   }
   async function demoConflict() {
     const success = await mutate((s) => {
-      const booked = s.requests.some(
-        (r) =>
-          r.equipmentId === "oscilloscope" &&
-          r.date === tomorrow &&
-          r.start === 600 &&
-          r.status === "approved",
-      );
-      if (booked) return s;
-      if (!isAvailable(s.requests, "oscilloscope", tomorrow, 600, 120))
-        throw new Error(
-          "The demo slot has changed. Reset demo data to try the sample conflict.",
-        );
       const seed = initialState().requests[0];
-      return {
-        ...s,
-        requests: [...s.requests, { ...seed, id: crypto.randomUUID() }],
-      };
+      let next = s;
+      while (
+        isAvailable(
+          next.requests,
+          "oscilloscope",
+          tomorrow,
+          600,
+          120,
+          undefined,
+          s.stock,
+        )
+      ) {
+        next = {
+          ...next,
+          requests: [...next.requests, { ...seed, id: crypto.randomUUID() }],
+        };
+      }
+      return next;
     });
     if (success) openRequest(equipment[1], true);
   }
@@ -476,6 +488,10 @@ export default function App() {
                         {item.category}
                       </span>
                       <h3>{item.name}</h3>
+                      <p className="muted">
+                        {stockCount(item.id, state.stock)} units total · 1 unit
+                        per booking
+                      </p>
                       <p className="equipment-location">
                         <MapPin size={13} />
                         {item.location}
@@ -587,6 +603,18 @@ export default function App() {
                   );
               }}
             />
+            {view === "faculty" && (
+              <StockEditor
+                state={state}
+                busy={busy}
+                onSave={async (id, count) => {
+                  const saved = await mutate((s) => updateStock(s, id, count));
+                  if (saved)
+                    setNotice("Equipment stock updated in this browser.");
+                  return saved;
+                }}
+              />
+            )}
             <button
               className="button secondary back-button"
               onClick={() => nav("discover")}
@@ -657,11 +685,11 @@ export default function App() {
           state={state}
           conflict={conflict}
           onClose={() => setSelected(null)}
-          onSubmit={async (input) => {
-            const saved = await mutate((s) => createRequest(s, input));
-            if (saved) setView("requests");
-            return saved;
+          onViewRequests={() => {
+            setSelected(null);
+            nav("requests");
           }}
+          onSubmit={(input) => mutate((s) => createRequest(s, input))}
         />
       )}
     </>

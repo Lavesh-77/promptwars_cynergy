@@ -45,6 +45,7 @@ export interface Relocation {
 export interface LabState {
   version: 1;
   requests: AccessRequest[];
+  stock?: Record<string, number>;
 }
 export interface Slot {
   date: string;
