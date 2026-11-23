@@ -36,6 +36,7 @@ import EquipmentArt from "./components/EquipmentArt";
 import RequestDialog from "./components/RequestDialog";
 import RequestList from "./components/RequestList";
 import StockEditor from "./components/StockEditor";
+import AISchedulingAssistant from "./components/AISchedulingAssistant";
 
 type View = "discover" | "requests" | "faculty";
 export default function App() {
@@ -580,6 +581,7 @@ export default function App() {
                 </div>
               </div>
             )}
+            {view === "faculty" && <AISchedulingAssistant state={state} />}
             <RequestList
               state={state}
               faculty={view === "faculty"}

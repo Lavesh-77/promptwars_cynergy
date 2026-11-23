@@ -65,8 +65,9 @@ export default function RequestList({
           ordered by earliest deadline, exact-slot requests before flexible
           ones, fewer approved hours for the same demo name, then submission
           time. A flexible approval can be moved only after faculty choose a
-          replacement and confirm both changes. Recommendations are rule-based,
-          not generative AI. Changing names can bypass demo fairness.
+          replacement and confirm both changes. Slot eligibility is rule-based;
+          optional Gemini advice never changes bookings. Changing names can
+          bypass demo fairness.
         </div>
       )}
       {!list.length && (

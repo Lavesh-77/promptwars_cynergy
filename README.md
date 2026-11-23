@@ -72,7 +72,7 @@ React UI → Zod request validation → deterministic scheduling → browser-loc
 
 ## Important limitations — not a production booking system
 
-- **No generative AI is integrated.** Recommendations are deterministic and labelled honestly. GenAI was explicitly deferred until a provider account/key is available. This does **not yet fulfil the statement's GenAI requirement**.
+- **Gemini advice requires Vercel and a configured server-side key.** GitHub Pages remains a static/manual fallback. AI explains a deterministic allocation plan; faculty retain all approval and rescheduling controls. Explanations are advisory, not verified facts.
 - **Requests are not shared across users/devices.** They belong to this browser and origin. “My requests” also includes seeded projects; no identity is verified.
 - Faculty approvals are public, simulated demo controls, not authorisation. Use fictional data only.
 - Fairness uses display names and can be bypassed by changing a name. Requirements are advisory, not verified certifications.
@@ -102,22 +102,32 @@ The GitHub Actions workflow builds, tests, and publishes an artifact to **GitHub
 3. Run **Check and deploy LabLink**, or push a change to `main`.
 4. Expected address after successful deployment: https://lavesh-77.github.io/promptwars_cynergy/
 
-Alternatively import the repository into Vercel. Framework: Vite; build: `npm run build`; output: `dist`. No secrets or environment variables are required. Ensure deployment protection is off for the evaluator's URL.
+### Vercel + Gemini
+
+Import the repository into Vercel. Framework: Vite; build: `npm run build`; output: `dist`. In Vercel project settings, configure `GEMINI_API_KEY` for Production/Preview, then redeploy. Never put this key in a `VITE_*` variable, source code, or chat. Optional `GEMINI_MODEL` defaults to `gemini-3.5-flash-lite`, a current low-latency model listed in Google's model catalogue. Model access/quota depends on the Google project. Ensure deployment protection is off for the evaluator's production URL.
+
+Vercel builds use `/` as the Vite base and enable **Faculty demo → AI Scheduling Assistant**. GitHub Pages keeps relative assets and disables API calls, preserving the manual workflow. `/api/recommend` runs on Vercel only. The two origins have independent browser-local data.
+
+The assistant reviews at most eight pending requests, in the existing deadline/exact-slot/fair-share/submission order. The server computes a jointly feasible plan, reserving candidate capacity for each earlier request before considering the next. Gemini receives only candidate equipment IDs/names, deadlines, requirements, flexibility, durations, rank and permitted slots—not student names, history, or project titles. The server and browser reject invented slots, changed equipment, missing rows or reordered priorities. A queue/stock change clears old advice. Availability is checked again by the existing approval controls. No AI endpoint writes bookings.
+
+Security: POST JSON only, same-origin checks, 64 KB application body limit, Zod validation, 15-second provider timeout, 20-second client timeout, bounded output, five requests/minute/IP per warm function instance, no provider details or keys in responses/logs, and `no-store` responses. Rate limiting is best-effort, not distributed; configure Vercel firewall/provider quotas for stronger cost control. Requirements may contain personal text, so use fictional data. On provider failure, invalid output, missing key or exhausted quota, the assistant displays an error and all manual controls remain usable.
+
+Verification of a real provider call requires a successful production POST returning `provider: "Google Gemini"`, a model ID, and a validated plan. Mocked API tests alone do not establish live Gemini connectivity.
 
 ## Evaluation alignment
 
-| Criterion         | Evidence                                                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Code quality      | Strict TypeScript; isolated scheduler/store; reusable components; formatting and documented policy                                 |
-| Security          | No secrets; bounded validated input; React-escaped output; no HTML injection; honest public-demo boundary                          |
-| Efficiency        | Small static deployment; bounded catalogue and 30-day search; no unnecessary network/AI calls                                      |
-| Testing           | Scheduling edge cases, request lifecycle, corrupted storage recovery, UI workflows; browser test suite                             |
-| Accessibility     | Semantic headings, labelled forms, native modal, skip link, keyboard focus, reduced motion, axe checks                             |
-| Problem alignment | Cross-department discovery, project access, faculty demo, deadline-aware conflict resolution; GenAI and shared storage remain gaps |
+| Criterion         | Evidence                                                                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code quality      | Strict TypeScript; isolated scheduler/store; reusable components; formatting and documented policy                                                 |
+| Security          | No secrets; bounded validated input; React-escaped output; no HTML injection; honest public-demo boundary                                          |
+| Efficiency        | Small static deployment; bounded catalogue and 30-day search; no unnecessary network/AI calls                                                      |
+| Testing           | Scheduling edge cases, request lifecycle, corrupted storage recovery, UI workflows; browser test suite                                             |
+| Accessibility     | Semantic headings, labelled forms, native modal, skip link, keyboard focus, reduced motion, axe checks                                             |
+| Problem alignment | Cross-department discovery, faculty workflow, stock-aware conflict resolution, server-side Gemini advice; shared storage remains a demo limitation |
 
 ## Next priorities
 
 1. Verify the deployed public user journey and accessibility.
 2. Add a shared database and real atomic booking protection if multi-user persistence becomes required.
-3. Add optional server-side GenAI project-to-equipment matching and explanations using only validated catalogue IDs and feasible slots. Never place a provider key in a `VITE_*` variable.
+3. Verify live Gemini connectivity and available quota before submitting the first and final judged version.
 4. Add a utilisation view if time remains; no chart library is necessary.
