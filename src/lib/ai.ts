@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { equipment } from "../data";
+import { equipment } from "../data.js";
 import type { AccessRequest, LabState } from "../types";
 import {
   isAvailable,
   rankRequests,
   recommendSlots,
   requestSchema,
-} from "./scheduler";
+} from "./scheduler.js";
 
 export const aiInputSchema = z
   .object({

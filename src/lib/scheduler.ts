@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { AccessRequest, Slot } from "../types";
-import { equipment } from "../data";
+import { equipment } from "../data.js";
 
 export const OPEN = 9 * 60;
 export const CLOSE = 17 * 60;
