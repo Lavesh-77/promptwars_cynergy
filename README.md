@@ -42,7 +42,9 @@ Open http://localhost:5173. Production: `npm run build`, then `npm run preview`.
 - Faculty-confirmed rescheduling: when one approved flexible booking blocks an exact-slot request, choose a feasible replacement and explicitly confirm the move and approval together. Both changes are revalidated and persisted atomically in the local store. No cascading/multiple-booking moves.
 - Submission timestamps with timezone, a “Requested first” badge for the earliest overlapping submission, and linked submission/approval/rejection/rescheduling history. Legacy demo records show missing historical approval timestamps honestly.
 - Browser-local persistence, cross-tab updates, Web Locks for approval serialization on supported browsers, explicit demo reset and storage error recovery.
-- Google Gemini scheduling explanations through a server-only Vercel API, with validated priority-ordered feasible slots, timeouts and graceful manual fallback.
+- Google Gemini scheduling explanations through a server-only Vercel API, with validated priority-ordered feasible slots, timeouts, one bounded retry for transient gateway errors, and graceful manual fallback.
+- Seven-day utilisation panel in the faculty demo: approved unit-hours against stocked capacity (daily 09:00–17:00), approved session count, pending demand, and the busiest resource. Capacity accounts for editable stock.
+- Faculty-only panels are code-split and loaded on demand; catalogue availability is computed once per data change instead of once per card.
 - Native modal focus trapping, labelled fields, keyboard focus styles, skip link, reduced-motion support, textual status indicators.
 - Unit/integration tests, Playwright desktop/mobile workflows and accessibility checks, main-only deployment workflow.
 
@@ -121,14 +123,14 @@ Verification of a real provider call requires a successful production POST retur
 
 ## Evaluation alignment
 
-| Criterion         | Evidence                                                                                                                                           |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Code quality      | Strict TypeScript; isolated scheduler/store; reusable components; formatting and documented policy                                                 |
-| Security          | No secrets; bounded validated input; React-escaped output; no HTML injection; honest public-demo boundary                                          |
-| Efficiency        | Small static deployment; bounded catalogue and 30-day search; no unnecessary network/AI calls                                                      |
-| Testing           | Scheduling edge cases, request lifecycle, corrupted storage recovery, UI workflows; browser test suite                                             |
-| Accessibility     | Semantic headings, labelled forms, native modal, skip link, keyboard focus, reduced motion, axe checks                                             |
-| Problem alignment | Cross-department discovery, faculty workflow, stock-aware conflict resolution, server-side Gemini advice; shared storage remains a demo limitation |
+| Criterion         | Evidence                                                                                                                                                                   |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code quality      | Strict TypeScript; isolated scheduler/store; reusable components; formatting and documented policy                                                                         |
+| Security          | No secrets; bounded validated input; React-escaped output; no HTML injection; honest public-demo boundary                                                                  |
+| Efficiency        | Code-split faculty/AI panels, memoised catalogue availability, bounded 30-day search, stock-aware capacity math, AI only on explicit action                                |
+| Testing           | Scheduling edge cases, request lifecycle, corrupted storage recovery, UI workflows; browser test suite                                                                     |
+| Accessibility     | Semantic headings, labelled forms, native modal, skip link, keyboard focus, reduced motion, axe checks                                                                     |
+| Problem alignment | Cross-department discovery, faculty workflow, stock-aware conflict resolution, utilisation visibility, server-side Gemini advice; shared storage remains a demo limitation |
 
 ## Next priorities
 

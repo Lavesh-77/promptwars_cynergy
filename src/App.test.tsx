@@ -19,6 +19,22 @@ beforeAll(() => {
   };
 });
 describe("public demo workflow", () => {
+  it("shows the faculty utilisation summary and keeps the catalogue lightweight", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    expect(
+      screen.queryByRole("heading", { name: "Resource utilisation" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Faculty demo" }));
+    expect(
+      await screen.findByRole("heading", { name: "Resource utilisation" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("progressbar", {
+        name: "Seven-day equipment capacity booked",
+      }),
+    ).toBeInTheDocument();
+  });
   it("lets faculty edit stock and preserves it on reload", async () => {
     const user = userEvent.setup();
     const rendered = render(<App />);
