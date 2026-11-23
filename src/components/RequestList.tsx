@@ -128,6 +128,9 @@ function RequestCard({
             {item?.name || "Equipment unavailable"}
           </span>
           <h3>{request.project}</h3>
+          {(request.id === "seed-1" || request.id === "seed-2") && (
+            <p className="sample-label">Sample project · fictional demo data</p>
+          )}
           <p className="muted">
             {request.student} · Deadline {prettyDate(request.deadline)}
           </p>

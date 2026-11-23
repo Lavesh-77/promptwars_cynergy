@@ -22,7 +22,7 @@ export default function AISchedulingAssistant({ state }: { state: LabState }) {
   const supported = import.meta.env.VITE_AI_ENABLED === "true";
   return (
     <section
-      className="request-card"
+      className="request-card ai-assistant"
       aria-labelledby="ai-title"
       aria-busy={busy}
     >

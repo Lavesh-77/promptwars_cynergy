@@ -110,6 +110,33 @@ export default async function handler(req: Request, res: Response) {
           ],
           generationConfig: {
             responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              required: ["recommendations"],
+              properties: {
+                recommendations: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    required: ["requestId", "equipmentId", "slot", "reason"],
+                    properties: {
+                      requestId: { type: "STRING" },
+                      equipmentId: { type: "STRING" },
+                      slot: {
+                        type: "OBJECT",
+                        nullable: true,
+                        required: ["date", "start"],
+                        properties: {
+                          date: { type: "STRING" },
+                          start: { type: "INTEGER" },
+                        },
+                      },
+                      reason: { type: "STRING" },
+                    },
+                  },
+                },
+              },
+            },
             temperature: 0.2,
             maxOutputTokens: 2500,
           },
@@ -141,7 +168,9 @@ export default async function handler(req: Request, res: Response) {
   } catch {
     return fail(
       502,
-      "AI could not provide a valid recommendation in time. Manual scheduling remains available.",
+      controller.signal.aborted
+        ? "Gemini timed out. Please retry; manual scheduling remains available."
+        : "Gemini advice did not pass validation. Please retry; manual scheduling remains available.",
     );
   } finally {
     clearTimeout(timeout);

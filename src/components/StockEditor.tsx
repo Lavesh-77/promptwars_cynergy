@@ -10,7 +10,10 @@ interface Props {
 }
 export default function StockEditor({ state, busy, onSave }: Props) {
   return (
-    <section className="requests-section" aria-labelledby="stock-title">
+    <section
+      className="requests-section stock-section"
+      aria-labelledby="stock-title"
+    >
       <h2 id="stock-title">Equipment stock</h2>
       <p className="muted">
         Each booking uses one unit. Changes apply only in this browser.
@@ -45,7 +48,7 @@ function StockForm({
   const [error, setError] = useState("");
   return (
     <form
-      className="request-card"
+      className="request-card stock-form"
       onSubmit={async (event) => {
         event.preventDefault();
         setError("");
