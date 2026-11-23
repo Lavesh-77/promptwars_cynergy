@@ -1,0 +1,148 @@
+import type { Equipment } from "./types";
+
+export const equipment: Equipment[] = [
+  {
+    id: "arduino",
+    name: "Arduino Uno R4 WiFi",
+    department: "Electronics",
+    category: "Development kits",
+    location: "Innovation Lab · E-102",
+    description:
+      "Prototype connected ideas with a powerful, beginner-friendly development board.",
+    tags: ["IoT", "Embedded systems", "WiFi"],
+    requirement: "Basic electronics knowledge",
+    visual: "board",
+  },
+  {
+    id: "oscilloscope",
+    name: "Digital Oscilloscope",
+    department: "Electronics",
+    category: "Lab equipment",
+    location: "Circuits Lab · E-204",
+    description:
+      "Capture and analyse signals with a 200 MHz, four-channel digital oscilloscope.",
+    tags: ["Signal analysis", "200 MHz", "4 channels"],
+    requirement: "Lab safety orientation",
+    visual: "scope",
+  },
+  {
+    id: "printer",
+    name: "Prusa i3 MK3S+",
+    department: "Mechanical",
+    category: "Fabrication",
+    location: "Maker Space · M-001",
+    description:
+      "Turn your designs into precise, functional prototypes with reliable FDM printing.",
+    tags: ["3D printing", "PLA / PETG", "Prototyping"],
+    requirement: "3D printer safety orientation",
+    visual: "printer",
+  },
+  {
+    id: "gpu",
+    name: "NVIDIA RTX Workstation",
+    department: "Computer Science",
+    category: "Workstations",
+    location: "AI Research Lab · C-301",
+    description:
+      "Accelerate model training, simulations, and rendering with dedicated GPU compute.",
+    tags: ["Machine learning", "RTX 4090", "64 GB RAM"],
+    requirement: "Bring your dataset and environment",
+    visual: "workstation",
+  },
+  {
+    id: "pi",
+    name: "Raspberry Pi 5 Kit",
+    department: "Computer Science",
+    category: "Development kits",
+    location: "Systems Lab · C-202",
+    description:
+      "A complete single-board computing kit for robotics, edge computing, and vision.",
+    tags: ["Robotics", "Linux", "Computer vision"],
+    requirement: "Basic Linux knowledge",
+    visual: "board",
+  },
+  {
+    id: "microscope",
+    name: "Digital Microscope",
+    department: "Biotechnology",
+    category: "Lab equipment",
+    location: "Imaging Lab · B-103",
+    description:
+      "Explore samples in detail with high-resolution imaging and digital capture.",
+    tags: ["Imaging", "Microscopy", "Research"],
+    requirement: "Lab safety orientation",
+    visual: "scope",
+  },
+  {
+    id: "esp32",
+    name: "ESP32 Sensor Kit",
+    department: "Electronics",
+    category: "Development kits",
+    location: "Innovation Lab · E-102",
+    description:
+      "Build sensor networks using wireless connectivity and a collection of sensors.",
+    tags: ["IoT", "Sensors", "Bluetooth"],
+    requirement: "Basic electronics knowledge",
+    visual: "board",
+  },
+  {
+    id: "cad",
+    name: "CAD Design Workstation",
+    department: "Mechanical",
+    category: "Workstations",
+    location: "Design Studio · M-205",
+    description:
+      "Create assemblies and run engineering simulations on a dedicated workstation.",
+    tags: ["CAD", "Simulation", "Design"],
+    requirement: "Familiarity with CAD software",
+    visual: "workstation",
+  },
+  {
+    id: "logic",
+    name: "Logic Analyser",
+    department: "Electronics",
+    category: "Lab equipment",
+    location: "Circuits Lab · E-204",
+    description:
+      "Debug digital protocols and inspect multi-channel timing with precision.",
+    tags: ["Digital signals", "Debugging", "SPI / I2C"],
+    requirement: "Basic electronics knowledge",
+    visual: "scope",
+  },
+  {
+    id: "laser",
+    name: "Desktop Laser Cutter",
+    department: "Mechanical",
+    category: "Fabrication",
+    location: "Maker Space · M-001",
+    description:
+      "Cut and engrave approved materials for enclosures, models, and prototypes.",
+    tags: ["Laser cutting", "Prototyping", "Design"],
+    requirement: "Supervised use; laser safety orientation",
+    visual: "printer",
+  },
+  {
+    id: "bio",
+    name: "Bioinformatics Workstation",
+    department: "Biotechnology",
+    category: "Workstations",
+    location: "Research Suite · B-202",
+    description:
+      "Analyse biological datasets using a dedicated scientific computing environment.",
+    tags: ["Data analysis", "Genomics", "Research"],
+    requirement: "Bring de-identified datasets only",
+    visual: "workstation",
+  },
+  {
+    id: "fpga",
+    name: "FPGA Development Board",
+    department: "Computer Science",
+    category: "Development kits",
+    location: "Systems Lab · C-202",
+    description:
+      "Explore digital logic, hardware acceleration, and custom processor design.",
+    tags: ["Digital logic", "Verilog", "Hardware"],
+    requirement: "Digital design fundamentals",
+    visual: "board",
+  },
+];
