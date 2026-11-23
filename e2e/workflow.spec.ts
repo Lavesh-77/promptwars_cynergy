@@ -85,6 +85,17 @@ test("two tabs cannot approve the same equipment slot", async ({
   context,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Faculty demo" }).click();
+  await page
+    .getByRole("spinbutton", { name: "Arduino Uno R4 WiFi stock" })
+    .fill("1");
+  await page
+    .getByRole("button", { name: "Save stock for Arduino Uno R4 WiFi" })
+    .click();
+  await expect(
+    page.getByText("Equipment stock updated in this browser."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Student view" }).click();
   const other = await context.newPage();
   await other.goto("/");
   for (const tab of [page, other]) {

@@ -10,7 +10,7 @@
   font-weight: 400;
   --green: #176b4d;
   --dark: #233d33;
-  --muted: #738079;
+  --muted: #52634d;
   --line: #e5e8e1;
 }
 * {
@@ -153,7 +153,7 @@ html {
   background: none;
   font-size: 13px;
   position: relative;
-  color: #6f7a73;
+  color: var(--muted);
   padding: 0 2px;
   font-weight: 550;
 }
@@ -270,7 +270,7 @@ html {
 .hero-copy > p {
   font-size: 14px;
   line-height: 1.9;
-  color: #738077;
+  color: var(--muted);
   margin-top: 28px;
 }
 .hero-actions {
@@ -367,7 +367,7 @@ html {
 }
 .hero-social p {
   font-size: 10px;
-  color: #788177;
+  color: var(--muted);
   line-height: 1.7;
 }
 .hero-social strong {
@@ -376,6 +376,7 @@ html {
 }
 .hero-illustration {
   position: relative;
+  overflow: clip;
   min-height: 350px;
   display: flex;
   align-items: center;
@@ -455,7 +456,7 @@ html {
   display: block;
   font-size: 9px;
   margin-top: 4px;
-  color: #7c8879;
+  color: var(--muted);
 }
 .round-arrow {
   width: 30px;
@@ -567,7 +568,7 @@ html {
 .stats-strip p > span {
   display: block;
   margin-top: 5px;
-  color: #78836f;
+  color: var(--muted);
   font-size: 10px;
 }
 .catalogue {
@@ -585,7 +586,7 @@ html {
   font-size: 9px;
   letter-spacing: 1.6px;
   font-weight: 700;
-  color: #7d8b6c;
+  color: var(--muted);
   margin-bottom: 10px;
 }
 h2 {
@@ -595,7 +596,7 @@ h2 {
   line-height: 1.4;
 }
 .muted {
-  color: #788277;
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.8;
   margin-top: 6px;
@@ -679,7 +680,7 @@ h2 {
   border: 1px solid #e1e6dc;
   border-radius: 5px;
   background: transparent;
-  color: #73806c;
+  color: var(--muted);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -696,7 +697,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #6f7b65;
+  color: var(--muted);
   white-space: nowrap;
 }
 .availability-filter input {
@@ -706,7 +707,7 @@ h2 {
 }
 .results-label {
   font-size: 10px;
-  color: #7c8773;
+  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 3px;
@@ -719,7 +720,7 @@ h2 {
 .results-label > span {
   margin-left: auto;
   font-size: 9px;
-  color: #86907d;
+  color: var(--muted);
 }
 .equipment-grid {
   display: grid;
@@ -811,7 +812,7 @@ h2 {
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 1.1px;
-  color: #8b9581;
+  color: var(--muted);
 }
 .equipment-body h3 {
   font-size: 14px;
@@ -825,13 +826,13 @@ h2 {
   align-items: center;
   gap: 4px;
   font-size: 9px;
-  color: #8a927f;
+  color: var(--muted);
   margin-top: 7px;
 }
 .equipment-description {
   font-size: 10px;
   line-height: 1.8;
-  color: #7d8775;
+  color: var(--muted);
   margin-top: 12px;
   min-height: 54px;
 }
@@ -847,7 +848,7 @@ h2 {
   border: 1px solid #e9ece2;
   font-size: 8px;
   padding: 4px 6px;
-  color: #788569;
+  color: var(--muted);
   border-radius: 4px;
 }
 .equipment-footer {
@@ -864,7 +865,7 @@ h2 {
   align-items: center;
   gap: 4px;
   font-size: 9px;
-  color: #86917b;
+  color: var(--muted);
   white-space: nowrap;
 }
 .equipment-footer button {
@@ -903,7 +904,7 @@ h2 {
 }
 .steps > div > span {
   font-size: 10px;
-  color: #7b9a68;
+  color: var(--muted);
   font-weight: 700;
 }
 .steps h3 {
@@ -913,7 +914,7 @@ h2 {
 }
 .steps p {
   font-size: 10px;
-  color: #7a876f;
+  color: var(--muted);
   line-height: 1.8;
   margin-top: 7px;
 }
@@ -939,7 +940,7 @@ footer .brand {
 }
 .footer-top > p {
   font-size: 10px;
-  color: #859078;
+  color: var(--muted);
 }
 .footer-note {
   margin-left: auto;
@@ -951,7 +952,7 @@ footer .brand {
   justify-content: space-between;
   padding-top: 20px;
   font-size: 9px;
-  color: #8c957e;
+  color: var(--muted);
 }
 .footer-bottom > div {
   display: flex;
@@ -964,7 +965,7 @@ footer .brand {
   text-decoration: underline;
   padding: 0;
   font-size: 9px;
-  color: #718762;
+  color: var(--muted);
 }
 .dashboard-container {
   max-width: 1000px;
@@ -1001,7 +1002,7 @@ footer .brand {
   background: #f3f5ed;
   font-size: 11px;
   padding: 15px 18px;
-  color: #768266;
+  color: var(--muted);
   line-height: 1.9;
   margin-bottom: 22px;
 }
@@ -1027,7 +1028,7 @@ footer .brand {
 .request-equipment {
   font-size: 9px;
   letter-spacing: 0.6px;
-  color: #71875d;
+  color: var(--muted);
   text-transform: uppercase;
 }
 .request-card h3 {
@@ -1068,7 +1069,7 @@ footer .brand {
 }
 .request-description {
   font-size: 12px;
-  color: #7b8471;
+  color: var(--muted);
   line-height: 1.8;
   margin: 14px 0;
 }
@@ -1077,7 +1078,7 @@ footer .brand {
   gap: 20px;
   flex-wrap: wrap;
   font-size: 10px;
-  color: #7f8c70;
+  color: var(--muted);
 }
 .request-metadata span {
   display: flex;
@@ -1121,7 +1122,7 @@ footer .brand {
 }
 .alternative-button small {
   display: block;
-  color: #83896e;
+  color: var(--muted);
   font-size: 9px;
   margin-top: 4px;
 }
@@ -1171,7 +1172,7 @@ footer .brand {
   border: 1px dashed #d6dfca;
   border-radius: 8px;
   padding: 45px 20px;
-  color: #879575;
+  color: var(--muted);
   grid-column: 1/-1;
 }
 .empty-state > svg {
@@ -1221,7 +1222,7 @@ footer .brand {
   align-items: center;
   gap: 8px;
   font-size: 10px;
-  color: #6d7e5d;
+  color: var(--muted);
   background: #eff3e7;
   border: 1px solid #e3e9d8;
   border-radius: 6px;
@@ -1262,7 +1263,7 @@ footer .brand {
 }
 .request-dialog input::placeholder,
 .request-dialog textarea::placeholder {
-  color: #98a18d;
+  color: var(--muted);
 }
 .request-dialog label.checkbox-label {
   flex-direction: row;
@@ -1285,12 +1286,12 @@ footer .brand {
   background: #eff5e9;
   border-radius: 7px;
   padding: 14px;
-  color: #5b7b46;
+  color: #466334;
 }
 .slot-advice.conflict {
   background: #fcf5e6;
   border-color: #ebddbe;
-  color: #94703b;
+  color: #755322;
 }
 .advice-title {
   display: flex;
@@ -1319,15 +1320,15 @@ footer .brand {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #717e50;
+  color: var(--muted);
 }
 .slot-option > span {
-  color: #9d9f87;
+  color: var(--muted);
   font-size: 8px;
 }
 .privacy-note {
   font-size: 9px;
-  color: #929b86;
+  color: var(--muted);
   line-height: 1.8;
   margin: 14px 0;
 }
@@ -1354,7 +1355,7 @@ footer .brand {
   padding: 0;
 }
 .success-panel > p:not(.eyebrow) {
-  color: #7d8c6b;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.8;
   max-width: 390px;
