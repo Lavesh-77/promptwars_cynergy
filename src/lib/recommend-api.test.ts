@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
-import handler from "../../api/recommend";
+import handler, { fetchWithTransientRetry } from "../../api/recommend";
 import { aiPayload, allocationCandidates } from "./ai";
 import { request } from "../test/fixtures";
 
@@ -27,6 +27,57 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("Gemini API", () => {
+  it("recovers from one temporary provider outage without changing the request", async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("Unavailable", { status: 503 }))
+      .mockResolvedValueOnce(new Response("Recovered", { status: 200 }));
+    vi.stubGlobal("fetch", fetcher);
+    const options = {
+      method: "POST",
+      body: "same validated plan",
+      signal: new AbortController().signal,
+    };
+    const response = await fetchWithTransientRetry(
+      "https://example.test",
+      options,
+    );
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls[1]).toEqual(fetcher.mock.calls[0]);
+  });
+  it("never retries quota or credential errors and caps persistent outage retries", async () => {
+    for (const status of [429, 401, 403, 503]) {
+      const fetcher = vi
+        .fn()
+        .mockImplementation(() =>
+          Promise.resolve(new Response("Unavailable", { status })),
+        );
+      vi.stubGlobal("fetch", fetcher);
+      const response = await fetchWithTransientRetry(
+        "https://example.test",
+        {},
+      );
+      expect(response.status).toBe(status);
+      expect(fetcher).toHaveBeenCalledTimes(status === 503 ? 2 : 1);
+    }
+  });
+  it("does not retry after the shared deadline has expired", async () => {
+    const controller = new AbortController();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() => {
+        controller.abort();
+        return Promise.resolve(new Response("Unavailable", { status: 503 }));
+      }),
+    );
+    await expect(
+      fetchWithTransientRetry("https://example.test", {
+        signal: controller.signal,
+      }),
+    ).rejects.toThrow();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
   it("rejects unsupported methods, origins, content types, oversized and invalid inputs", async () => {
     for (const [req, status] of [
       [{ ...input(), method: "GET" }, 405],

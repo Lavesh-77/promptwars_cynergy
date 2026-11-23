@@ -18,6 +18,20 @@ interface Response {
 export const config = { maxDuration: 25 };
 const buckets = new Map<string, { count: number; expires: number }>();
 export const MAX_BODY = 64_000;
+export async function fetchWithTransientRetry(
+  url: string,
+  options: RequestInit,
+) {
+  let response = await fetch(url, options);
+  if ([502, 503, 504].includes(response.status)) {
+    await response.body?.cancel();
+    // Only one retry, sharing the original deadline. Never retry quota/key errors.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    options.signal?.throwIfAborted();
+    response = await fetch(url, options);
+  }
+  return response;
+}
 function header(req: Request, name: string) {
   const value = req.headers[name];
   return Array.isArray(value) ? value[0] : value;
@@ -91,7 +105,7 @@ export default async function handler(req: Request, res: Response) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);
   try {
-    const response = await fetch(
+    const response = await fetchWithTransientRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
         method: "POST",
@@ -168,7 +182,7 @@ export default async function handler(req: Request, res: Response) {
         );
       return fail(
         502,
-        "Gemini is temporarily unavailable. Continue with manual scheduling or retry later.",
+        "Google Gemini is temporarily unavailable. Temporary gateway errors are retried once; no bookings were changed. Continue with manual scheduling or retry later.",
       );
     }
     const data = await response.json();
