@@ -221,8 +221,9 @@ export default function RequestDialog({
                 checked={draft.flexible}
                 onChange={(e) => field("flexible", e.target.checked)}
               />
-              I’m flexible — faculty may approve a feasible alternative before
-              my deadline.
+              I’m flexible — faculty may approve an alternative or later move my
+              booking to make room for an exact-slot request, only with faculty
+              confirmation and before my project deadline.
             </label>
             <div className={`slot-advice ${available ? "" : "conflict"}`}>
               <div className="advice-title">

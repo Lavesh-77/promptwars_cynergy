@@ -1,11 +1,17 @@
 import { CalendarDays, Check, Clock3, X } from "lucide-react";
 import { equipment } from "../data";
-import type { AccessRequest, LabState } from "../types";
+import type { AccessRequest, LabState, Relocation } from "../types";
+import RelocationReview from "./RelocationReview";
+import RequestHistory from "./RequestHistory";
 import {
+  blockingBookings,
   isAvailable,
   prettyDate,
   rankRequests,
   recommendSlots,
+  relocationOptions,
+  requestedFirst,
+  timestampLabel,
   timeLabel,
 } from "../lib/scheduler";
 
@@ -18,8 +24,15 @@ interface Props {
     slot?: { date: string; start: number },
   ) => Promise<void>;
   busy: boolean;
+  onRelocate: (id: string, move: Relocation) => Promise<boolean>;
 }
-export default function RequestList({ state, faculty, onDecide, busy }: Props) {
+export default function RequestList({
+  state,
+  faculty,
+  onDecide,
+  onRelocate,
+  busy,
+}: Props) {
   const pending = rankRequests(state.requests);
   const list = faculty
     ? [
@@ -49,9 +62,11 @@ export default function RequestList({ state, faculty, onDecide, busy }: Props) {
       {faculty && (
         <div className="policy-note">
           <strong>Transparent priority, not a black box.</strong> Requests are
-          ordered by earliest deadline, fewer approved hours for the same demo
-          name, then submission time. Recommendations are rule-based, not
-          generative AI. Changing names can bypass demo fairness.
+          ordered by earliest deadline, exact-slot requests before flexible
+          ones, fewer approved hours for the same demo name, then submission
+          time. A flexible approval can be moved only after faculty choose a
+          replacement and confirm both changes. Recommendations are rule-based,
+          not generative AI. Changing names can bypass demo fairness.
         </div>
       )}
       {!list.length && (
@@ -72,6 +87,7 @@ export default function RequestList({ state, faculty, onDecide, busy }: Props) {
             state={state}
             faculty={faculty}
             onDecide={onDecide}
+            onRelocate={onRelocate}
             busy={busy}
           />
         ))}
@@ -84,6 +100,7 @@ function RequestCard({
   state,
   faculty,
   onDecide,
+  onRelocate,
   busy,
 }: Omit<Props, "state"> & { request: AccessRequest; state: LabState }) {
   const item = equipment.find((e) => e.id === request.equipmentId);
@@ -99,6 +116,8 @@ function RequestCard({
     request.status === "pending" && !available
       ? recommendSlots(request, state.requests)
       : [];
+  const relocation = relocationOptions(request, state.requests);
+  const first = requestedFirst(request, state.requests);
   return (
     <article className="request-card">
       <div className="request-card-top">
@@ -110,12 +129,18 @@ function RequestCard({
           <p className="muted">
             {request.student} · Deadline {prettyDate(request.deadline)}
           </p>
+          {faculty && first && (
+            <span className="first-request-tag">
+              Requested first · earliest submission in this conflict
+            </span>
+          )}
         </div>
         <span className={`status ${request.status}`}>
           <span />
           {request.status}
         </span>
       </div>
+      <RequestHistory request={request} requests={state.requests} />
       <p className="request-description">{request.description}</p>
       <div className="request-metadata">
         <span>
@@ -137,8 +162,39 @@ function RequestCard({
           <p>
             The preferred slot overlaps an approved booking.
             {!request.flexible &&
-              " This student needs an exact slot; reject it or ask them to submit a new request."}
+              " This student needs the exact slot. Keep the request pending while reviewing a possible move; it will not be automatically rejected."}
           </p>
+          {faculty &&
+            blockingBookings(request, state.requests).map((blocker) => (
+              <p key={blocker.id}>
+                Booked by “{blocker.project}” · submitted{" "}
+                {timestampLabel(blocker.createdAt)}
+                {requestedFirst(blocker, state.requests)
+                  ? " · Requested first"
+                  : ""}
+                .
+              </p>
+            ))}
+          {faculty && relocation && relocation.slots.length > 0 && (
+            <RelocationReview
+              key={`${relocation.booking.id}-${relocation.booking.date}-${relocation.booking.start}`}
+              request={request}
+              booking={relocation.booking}
+              slots={relocation.slots}
+              busy={busy}
+              onConfirm={onRelocate}
+            />
+          )}
+          {faculty &&
+            !request.flexible &&
+            (!relocation || relocation.slots.length === 0) && (
+              <p>
+                No supported single-booking move is available before the
+                flexible project’s deadline. The approved booking stays
+                unchanged; this request stays pending for faculty review.
+                Multiple-booking conflicts need manual review.
+              </p>
+            )}
           {faculty &&
             alternatives.map((slot) => (
               <button

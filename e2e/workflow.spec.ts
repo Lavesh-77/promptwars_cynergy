@@ -18,11 +18,9 @@ test("discover, request, approve, reload", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("button", { name: "View my requests" }).click();
   await page.getByRole("button", { name: "Faculty demo" }).click();
-  const card = page
-    .getByRole("article")
-    .filter({
-      has: page.getByRole("heading", { name: "Campus garden sensor" }),
-    });
+  const card = page.getByRole("article").filter({
+    has: page.getByRole("heading", { name: "Campus garden sensor" }),
+  });
   await card.getByRole("button", { name: "Approve preferred slot" }).click();
   await expect(card.getByText("approved", { exact: true })).toBeVisible();
   await page.reload();
@@ -47,11 +45,9 @@ test("conflicting request can be approved into a feasible alternative", async ({
   await form.getByRole("button", { name: "Submit access request" }).click();
   await page.getByRole("button", { name: "View my requests" }).click();
   await page.getByRole("button", { name: "Faculty demo" }).click();
-  const card = page
-    .getByRole("article")
-    .filter({
-      has: page.getByRole("heading", { name: "Signal analysis deadline" }),
-    });
+  const card = page.getByRole("article").filter({
+    has: page.getByRole("heading", { name: "Signal analysis deadline" }),
+  });
   await expect(
     card.getByRole("button", { name: "Approve preferred slot" }),
   ).toBeDisabled();

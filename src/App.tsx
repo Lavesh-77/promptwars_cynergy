@@ -26,6 +26,7 @@ import { addDays, dateKey, isAvailable } from "./lib/scheduler";
 import {
   createRequest,
   decideRequest,
+  approveWithRelocation,
   initialState,
   loadState,
   transact,
@@ -567,6 +568,16 @@ export default function App() {
               state={state}
               faculty={view === "faculty"}
               busy={busy}
+              onRelocate={async (id, move) => {
+                const saved = await mutate((s) =>
+                  approveWithRelocation(s, id, move),
+                );
+                if (saved)
+                  setNotice(
+                    "Flexible booking moved and exact-slot request approved together. Both change histories have been updated.",
+                  );
+                return saved;
+              }}
               onDecide={async (id, decision, slot) => {
                 if (await mutate((s) => decideRequest(s, id, decision, slot)))
                   setNotice(

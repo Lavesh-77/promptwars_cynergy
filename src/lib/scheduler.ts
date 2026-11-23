@@ -198,8 +198,86 @@ export function rankRequests(requests: AccessRequest[]): AccessRequest[] {
     .sort(
       (a, b) =>
         a.deadline.localeCompare(b.deadline) ||
+        Number(a.flexible) - Number(b.flexible) ||
         used(a.student) - used(b.student) ||
         a.createdAt.localeCompare(b.createdAt) ||
         a.id.localeCompare(b.id),
     );
+}
+
+export function blockingBookings(
+  request: AccessRequest,
+  requests: AccessRequest[],
+): AccessRequest[] {
+  return requests.filter(
+    (r) =>
+      r.id !== request.id &&
+      r.status === "approved" &&
+      r.equipmentId === request.equipmentId &&
+      r.date === request.date &&
+      overlaps(r, request),
+  );
+}
+
+// Only direct, single-booking moves are supported; no cascading reschedules.
+export function relocationOptions(
+  request: AccessRequest,
+  requests: AccessRequest[],
+): { booking: AccessRequest; slots: Slot[] } | null {
+  if (
+    request.status !== "pending" ||
+    request.flexible ||
+    !requestSchema.safeParse(request).success
+  )
+    return null;
+  const blockers = blockingBookings(request, requests);
+  if (
+    blockers.length !== 1 ||
+    !blockers[0].flexible ||
+    !requestSchema.safeParse(blockers[0]).success
+  )
+    return null;
+  const booking = blockers[0];
+  const reserved = [
+    ...requests.filter((r) => r.id !== booking.id && r.id !== request.id),
+    { ...request, status: "approved" as const },
+  ];
+  // A flexible booking may move earlier or later, but never outside its deadline.
+  return {
+    booking,
+    slots: recommendSlots({ ...booking, date: dateKey() }, reserved),
+  };
+}
+
+export function requestedFirst(
+  request: AccessRequest,
+  requests: AccessRequest[],
+): boolean {
+  const competitors = requests.filter(
+    (r) =>
+      r.id !== request.id &&
+      r.status !== "rejected" &&
+      r.equipmentId === request.equipmentId &&
+      r.date === request.date &&
+      overlaps(r, request),
+  );
+  return (
+    request.status !== "rejected" &&
+    competitors.length > 0 &&
+    competitors.every((r) => request.createdAt < r.createdAt)
+  );
+}
+
+export function timestampLabel(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Timestamp unavailable";
+  return new Intl.DateTimeFormat("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  }).format(date);
 }

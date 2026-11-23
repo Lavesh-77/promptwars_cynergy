@@ -24,6 +24,23 @@ export interface AccessRequest {
   flexible: boolean;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
+  history?: RequestEvent[];
+}
+export interface SessionSlot {
+  date: string;
+  start: number;
+}
+export interface RequestEvent {
+  action: "submitted" | "approved" | "rejected" | "rescheduled";
+  at: string;
+  from?: SessionSlot;
+  to?: SessionSlot;
+  relatedRequestId?: string;
+}
+export interface Relocation {
+  bookingId: string;
+  from: SessionSlot;
+  to: SessionSlot;
 }
 export interface LabState {
   version: 1;

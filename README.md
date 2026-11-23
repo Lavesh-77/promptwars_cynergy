@@ -33,8 +33,10 @@ Open http://localhost:5173. Production: `npm run build`, then `npm run preview`.
 - Project-linked access requests with equipment requirements, date, deadline, duration, and explicit flexibility preference.
 - Runtime input validation, bounded text, real calendar date checks, operating-hour checks, past-time checks, 30-day booking horizon.
 - Conflict detection, deadline-bounded alternative suggestions, public simulated faculty approval/rejection.
-- Fair request ordering: earlier deadline, fewer approved minutes under the same demo name, earlier submission.
+- Fair request ordering: earlier deadline, exact-slot before flexible, fewer approved minutes under the same demo name, earlier submission.
 - Approval-time revalidation; pending requests do not reserve equipment; approved sessions are never silently moved.
+- Faculty-confirmed rescheduling: when one approved flexible booking blocks an exact-slot request, choose a feasible replacement and explicitly confirm the move and approval together. Both changes are revalidated and persisted atomically in the local store. No cascading/multiple-booking moves.
+- Submission timestamps with timezone, a “Requested first” badge for the earliest overlapping submission, and linked submission/approval/rejection/rescheduling history. Legacy demo records show missing historical approval timestamps honestly.
 - Browser-local persistence, cross-tab updates, Web Locks for approval serialization on supported browsers, explicit demo reset and storage error recovery.
 - Native modal focus trapping, labelled fields, keyboard focus styles, skip link, reduced-motion support, textual status indicators.
 - Unit/integration tests, Playwright desktop/mobile workflows and accessibility checks, main-only deployment workflow.
@@ -54,6 +56,17 @@ React UI → Zod request validation → deterministic scheduling → browser-loc
 - `e2e/`: browser workflow, concurrency, mobile layout and axe accessibility tests.
 
 **Scheduling policy:** daily 09:00–17:00, 30-minute increments, 30-minute to four-hour sessions. Dates use the browser's local wall-clock timezone as the demo campus timezone. Alternatives fit the entire session before the project deadline, preferring the requested day and nearby times. Exact-slot requests are not automatically moved. Faculty retain discretion; queue ranking is advisory, not forced preemption.
+
+### Fixed versus flexible conflicts
+
+1. Queue ordering remains **deadline first**. For equal deadlines, exact-slot requests precede flexible requests, then fair-share usage and submission time.
+2. A fixed request overlapping one approved flexible booking offers faculty replacement options for the flexible project. Replacement options may be earlier or later than its original date, but must be in the future, meet its deadline, preserve duration, and avoid all approved sessions and the incoming fixed session.
+3. Faculty choose a replacement, review both original/new sessions, and explicitly confirm. Cancel makes no changes. A stale or unavailable replacement makes no changes to either booking.
+4. If no replacement is feasible, the existing approval remains and the fixed request stays pending, with both submission times and the first-request badge available for review. There is no automatic rejection or cancellation.
+5. Multiple blocking bookings, non-flexible blockers, and sessions already started require manual review. No automatic rescheduling or cascade is performed.
+6. Every new approval, rejection, and reschedule records its timestamp. A coordinated move links both projects' histories and preserves the flexible booking's prior history and original slot. Previously stored records remain readable; unknown old approval timestamps are not invented.
+
+**Demo this case:** use **Try a scheduling conflict**, uncheck the flexibility checkbox, and submit. In **Faculty demo**, locate the exact-slot project, choose a replacement for the flexible booking, select **Review move & approval**, then **Confirm move & approve**. Expand each project's **Full change history** to see the coordinated updates.
 
 ## Important limitations — not a production booking system
 

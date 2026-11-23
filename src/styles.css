@@ -1890,6 +1890,87 @@ footer .brand {
     width: calc(100% - 20px);
   }
 }
+.first-request-tag {
+  display: inline-block;
+  margin-top: 9px;
+  padding: 5px 9px;
+  border: 1px solid #d2dfbc;
+  border-radius: 5px;
+  background: #edf3df;
+  color: #415c2b;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.request-history {
+  margin-top: 15px;
+  font-size: 11px;
+  color: #59684f;
+  line-height: 1.8;
+}
+.request-history summary {
+  cursor: pointer;
+  width: fit-content;
+  margin-top: 6px;
+  color: var(--green);
+}
+.request-history summary:focus-visible {
+  outline: 3px solid #b17c28;
+  outline-offset: 3px;
+}
+.request-history ol {
+  margin: 12px 0;
+  padding-left: 22px;
+}
+.request-history li {
+  padding: 5px 0;
+}
+.request-history li > time,
+.request-history li > span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.relocation-review {
+  margin-top: 15px;
+  padding-top: 14px;
+  border-top: 1px solid #e4d4b4;
+  color: #4b613b;
+}
+.relocation-review label {
+  display: block;
+  margin: 13px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.relocation-review select {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  border: 1px solid #b9c6a7;
+  background: #fff;
+  color: #3b5530;
+  border-radius: 5px;
+  padding: 11px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.move-confirmation {
+  margin-top: 14px;
+  padding: 15px;
+  border: 1px solid #c7d7b3;
+  border-radius: 7px;
+  background: #f5f8ec;
+  color: #445b35;
+}
+.move-confirmation h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+.move-confirmation p {
+  font-size: 11px;
+}
+.move-confirmation .request-actions {
+  flex-wrap: wrap;
+}
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
