@@ -143,11 +143,34 @@ export default async function handler(req: Request, res: Response) {
         }),
       },
     );
-    if (!response.ok)
+    if (!response.ok) {
+      if (response.status === 429) {
+        res.setHeader("Retry-After", "60");
+        return fail(
+          429,
+          "Google Gemini quota or rate limit reached. Wait at least one minute before retrying. If this persists, check the Google project's API quota and billing. Manual scheduling remains available.",
+        );
+      }
+      if (response.status === 401 || response.status === 403)
+        return fail(
+          503,
+          "Google rejected the AI credentials or project access. Check the server-side key and Gemini API permissions in Vercel/Google AI Studio. Manual scheduling remains available.",
+        );
+      if (response.status === 404)
+        return fail(
+          503,
+          "The configured Gemini model is unavailable for this project. Check GEMINI_MODEL in Vercel. Manual scheduling remains available.",
+        );
+      if (response.status === 400)
+        return fail(
+          502,
+          "Google rejected the AI request configuration. The integration needs review; manual scheduling remains available.",
+        );
       return fail(
         502,
         "Gemini is temporarily unavailable. Continue with manual scheduling or retry later.",
       );
+    }
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts
       ?.filter(

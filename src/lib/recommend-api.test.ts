@@ -133,7 +133,7 @@ describe("Gemini API", () => {
       vi
         .fn()
         .mockResolvedValue(
-          new Response("sensitive provider details", { status: 429 }),
+          new Response("sensitive provider details", { status: 500 }),
         ),
       vi.fn().mockRejectedValue(new DOMException("Timeout", "AbortError")),
     ]) {
@@ -143,6 +143,26 @@ describe("Gemini API", () => {
       expect(res.status).toHaveBeenCalledWith(502);
       expect(JSON.stringify(res.json.mock.calls)).not.toContain("sensitive");
     }
+  });
+  it("reports provider quota failures without exposing provider response details", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response("sensitive quota details", { status: 429 }),
+        ),
+    );
+    const res = response();
+    await handler(input(), res);
+    expect(res.status).toHaveBeenCalledWith(429);
+    expect(JSON.stringify(res.json.mock.calls)).toContain(
+      "quota or rate limit",
+    );
+    expect(JSON.stringify(res.json.mock.calls)).not.toContain(
+      "sensitive quota details",
+    );
   });
   it("limits repeated requests within one warm function instance", async () => {
     vi.stubEnv("GEMINI_API_KEY", "test-key");
