@@ -1027,6 +1027,73 @@ footer .brand {
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
+.utilization-panel {
+  margin-bottom: 24px;
+  background: #f3f7ef;
+  border: 1px solid #dce6d3;
+  border-radius: 12px;
+  padding: 24px;
+}
+.utilization-panel h2 {
+  font-size: 24px;
+  margin: 5px 0 7px;
+}
+.utilization-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.utilization-grid article {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  background: #fff;
+  border: 1px solid #dde5d7;
+  border-radius: 9px;
+  padding: 15px;
+}
+.utilization-grid svg {
+  color: var(--green);
+  width: 19px;
+}
+.utilization-grid strong {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.utilization-grid span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.utilization-track {
+  height: 9px;
+  overflow: hidden;
+  background: #dfe7d9;
+  border-radius: 99px;
+}
+.utilization-track span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  border-radius: inherit;
+}
+.utilization-detail {
+  margin-top: 9px;
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .utilization-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 390px) {
+  .utilization-panel {
+    padding: 18px;
+  }
+  .utilization-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .ai-assistant h2 {
   font-size: 24px;
   line-height: 1.3;

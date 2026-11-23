@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -36,7 +36,13 @@ import EquipmentArt from "./components/EquipmentArt";
 import RequestDialog from "./components/RequestDialog";
 import RequestList from "./components/RequestList";
 import StockEditor from "./components/StockEditor";
-import AISchedulingAssistant from "./components/AISchedulingAssistant";
+
+const AISchedulingAssistant = lazy(
+  () => import("./components/AISchedulingAssistant"),
+);
+const UtilizationSummary = lazy(
+  () => import("./components/UtilizationSummary"),
+);
 
 type View = "discover" | "requests" | "faculty";
 export default function App() {
@@ -77,28 +83,45 @@ export default function App() {
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
   }, []);
-  const pending = state.requests.filter((r) => r.status === "pending").length;
-  function hasSlots(item: Equipment) {
-    return Array.from({ length: 16 }, (_, i) => 540 + i * 30).some((start) =>
-      isAvailable(
-        state.requests,
-        item.id,
-        tomorrow,
-        start,
-        30,
-        undefined,
-        state.stock,
+  const pending = useMemo(
+    () => state.requests.filter((r) => r.status === "pending").length,
+    [state.requests],
+  );
+  const tomorrowAvailability = useMemo(
+    () =>
+      new Map(
+        equipment.map((item) => [
+          item.id,
+          Array.from({ length: 16 }, (_, i) => 540 + i * 30).some((start) =>
+            isAvailable(
+              state.requests,
+              item.id,
+              tomorrow,
+              start,
+              30,
+              undefined,
+              state.stock,
+            ),
+          ),
+        ]),
       ),
-    );
-  }
-  const filtered = equipment.filter(
-    (item) =>
-      (category === "All resources" || item.category === category) &&
-      (department === "All departments" || item.department === department) &&
-      (!availableOnly || hasSlots(item)) &&
-      `${item.name} ${item.description} ${item.tags.join(" ")} ${item.department}`
-        .toLowerCase()
-        .includes(query.toLowerCase()),
+    [state.requests, state.stock, tomorrow],
+  );
+  const hasSlots = (item: Equipment) =>
+    tomorrowAvailability.get(item.id) ?? false;
+  const filtered = useMemo(
+    () =>
+      equipment.filter(
+        (item) =>
+          (category === "All resources" || item.category === category) &&
+          (department === "All departments" ||
+            item.department === department) &&
+          (!availableOnly || tomorrowAvailability.get(item.id)) &&
+          `${item.name} ${item.description} ${item.tags.join(" ")} ${item.department}`
+            .toLowerCase()
+            .includes(query.toLowerCase()),
+      ),
+    [availableOnly, category, department, query, tomorrowAvailability],
   );
   async function mutate(
     update: (s: LabState) => LabState,
@@ -581,7 +604,14 @@ export default function App() {
                 </div>
               </div>
             )}
-            {view === "faculty" && <AISchedulingAssistant state={state} />}
+            {view === "faculty" && (
+              <Suspense
+                fallback={<p role="status">Loading faculty insights…</p>}
+              >
+                <UtilizationSummary state={state} />
+                <AISchedulingAssistant state={state} />
+              </Suspense>
+            )}
             <RequestList
               state={state}
               faculty={view === "faculty"}
